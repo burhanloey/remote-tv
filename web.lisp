@@ -38,9 +38,9 @@
   (when (= (length post-param) 3)
     (destructuring-bind (path file-name content-type) post-param
       (declare (ignore content-type))
-      (uiop:run-program
-       (format nil "mv ~a ~a/~a" path hunchentoot:*tmp-directory* file-name))
-      (merge-pathnames file-name path))))
+      (let ((new-path (merge-pathnames file-name path)))
+        (uiop:run-program (format nil "mv ~a ~a" path new-path))
+        new-path))))
 
 (defun mpv (video-path subtitle-path)
   (let ((cmd (if subtitle-path
