@@ -76,7 +76,10 @@
   "/css/" (merge-pathnames #p"remote-tv/css/" (user-homedir-pathname)))
  hunchentoot:*dispatch-table*)
 
-(defparameter *serv* (make-instance 'hunchentoot:easy-acceptor :port 3000))
+(defparameter *serv*
+  (let* ((port-string (uiop:getenv "PORT"))
+         (port        (when port-string (parse-integer port-string))))
+    (make-instance 'hunchentoot:easy-acceptor :port (or port 3000))))
 
 (hunchentoot:start *serv*)
 ;; (hunchentoot:stop *serv*)
