@@ -35,7 +35,8 @@
       (:script :src "/js/upload.js")))))
 
 (defun save-uploaded-file (post-param)
-  (when (= (length post-param) 3)
+  (when (and (listp post-param)
+             (= (length post-param) 3))
     (destructuring-bind (path file-name content-type) post-param
       (declare (ignore content-type))
       (let ((new-path (merge-pathnames file-name path)))
