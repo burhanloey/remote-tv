@@ -2,6 +2,9 @@
 (ql:quickload :uiop)
 (ql:quickload :spinneret)
 
+
+;; Template
+
 (defun index-page ()
   (spinneret:with-html-string
     (:doctype)
@@ -34,7 +37,13 @@
            (:span "0%"))))))
       (:script :src "/js/upload.js")))))
 
+
+;; Util functions
+
 (defun save-uploaded-file (post-param)
+  "Move uploaded binary to a file using filename used during upload. If it is
+not moved/copied it will be gone after request. Returns file path for the new
+file."
   (when (and (listp post-param)
              (= (length post-param) 3))
     (destructuring-bind (path file-name content-type) post-param
@@ -44,10 +53,14 @@
         new-path))))
 
 (defun mpv (video-path subtitle-path)
+  "Launch mpv to play the video with subtitle (if supplied)."
   (let ((cmd (if subtitle-path
                  (format nil "mpv ~a --sub-file ~a" video-path subtitle-path)
                  (format nil "mpv ~a" video-path))))
     (uiop:launch-program cmd)))
+
+
+;; Handlers
 
 (hunchentoot:define-easy-handler (index :uri "/") ()
   (case (hunchentoot:request-method*)
@@ -67,6 +80,9 @@
              (format nil "Siap upload. Video dah mula dimainkan. Boleh tutup website ni."))
            (format nil "Takde video pun."))))))
 
+
+;; Static files handlers
+
 (push
  (hunchentoot:create-folder-dispatcher-and-handler
   "/js/" (merge-pathnames #p"remote-tv/js/" (user-homedir-pathname)))
@@ -76,6 +92,9 @@
  (hunchentoot:create-folder-dispatcher-and-handler
   "/css/" (merge-pathnames #p"remote-tv/css/" (user-homedir-pathname)))
  hunchentoot:*dispatch-table*)
+
+
+;; Server
 
 (defparameter *serv*
   (let* ((port-string (uiop:getenv "PORT"))
