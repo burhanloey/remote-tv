@@ -61,6 +61,18 @@ doesn't have launch-program function."
     (bordeaux-threads:make-thread
      (lambda () (uiop:run-program cmd)))))
 
+(defun omxplayer (video-path subtitle-path)
+  "Launch omxplayer to play the video with subtitle (if supplied). Had to run on
+separate thread instead of using launch-program since the sbcl version for armhf
+doesn't have launch-program function."
+  (let ((cmd (if subtitle-path
+                 (format
+                  nil "omxplayer -o hdmi ~a --subtitles ~a --align center --blank"
+                  video-path subtitle-path)
+                 (format nil "omxplayer -o hdmi ~a --blank" video-path))))
+    (bordeaux-threads:make-thread
+     (lambda () (uiop:run-program cmd)))))
+
 
 ;; Handlers
 
@@ -78,7 +90,7 @@ doesn't have launch-program function."
                            (hunchentoot:post-parameter "subtitle"))))
        (if video-path
            (progn
-             (mpv video-path subtitle-path)
+             (omxplayer video-path subtitle-path)
              (format nil "Siap upload. Video dah mula dimainkan. Boleh tutup website ni."))
            (format nil "Takde video pun."))))))
 
