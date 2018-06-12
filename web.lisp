@@ -51,13 +51,22 @@ file."
         (uiop:run-program (format nil "mv ~a ~a" path new-path))
         new-path))))
 
+(defun make-mkv-cmd (video-path subtitle-path)
+  (if subtitle-path
+      (format nil "mpv ~a --sub-file ~a" video-path subtitle-path)
+      (format nil "mpv ~a" video-path)))
+
+(defun make-omxplayer-cmd (video-path subtitle-path)
+  (if subtitle-path
+      (format nil "omxplayer -o hdmi ~a --subtitles ~a --align center --blank"
+              video-path subtitle-path)
+      (format nil "omxplayer -o hdmi ~a --blank" video-path)))
+
 (defun mpv (video-path subtitle-path)
   "Launch mpv to play the video with subtitle (if supplied). Had to run on
 separate thread instead of using launch-program since the sbcl version for armhf
 doesn't have launch-program function."
-  (let ((cmd (if subtitle-path
-                 (format nil "mpv ~a --sub-file ~a" video-path subtitle-path)
-                 (format nil "mpv ~a" video-path))))
+  (let ((cmd (make-mkv-cmd video-path subtitle-path)))
     (bordeaux-threads:make-thread
      (lambda () (uiop:run-program cmd)))))
 
@@ -65,11 +74,7 @@ doesn't have launch-program function."
   "Launch omxplayer to play the video with subtitle (if supplied). Had to run on
 separate thread instead of using launch-program since the sbcl version for armhf
 doesn't have launch-program function."
-  (let ((cmd (if subtitle-path
-                 (format
-                  nil "omxplayer -o hdmi ~a --subtitles ~a --align center --blank"
-                  video-path subtitle-path)
-                 (format nil "omxplayer -o hdmi ~a --blank" video-path))))
+  (let ((cmd (make-omxplayer-cmd video-path subtitle-path)))
     (bordeaux-threads:make-thread
      (lambda () (uiop:run-program cmd)))))
 
