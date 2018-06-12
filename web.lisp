@@ -1,5 +1,4 @@
 (ql:quickload :hunchentoot)
-(ql:quickload :uiop)
 (ql:quickload :spinneret)
 
 
@@ -53,11 +52,14 @@ file."
         new-path))))
 
 (defun mpv (video-path subtitle-path)
-  "Launch mpv to play the video with subtitle (if supplied)."
+  "Launch mpv to play the video with subtitle (if supplied). Had to run on
+separate thread instead of using launch-program since the sbcl version for armhf
+doesn't have launch-program function."
   (let ((cmd (if subtitle-path
                  (format nil "mpv ~a --sub-file ~a" video-path subtitle-path)
                  (format nil "mpv ~a" video-path))))
-    (uiop:launch-program cmd)))
+    (bordeaux-threads:make-thread
+     (lambda () (uiop:run-program cmd)))))
 
 
 ;; Handlers
